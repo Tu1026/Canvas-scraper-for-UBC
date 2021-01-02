@@ -39,7 +39,6 @@ if __name__ == "__main__"
         for module in modules:
             module: Module = module
             module_items = module.get_module_items()
-            print(course.name)
             for item in module_items:
                 item: ModuleItem = item
 

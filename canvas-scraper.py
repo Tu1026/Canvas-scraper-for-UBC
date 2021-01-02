@@ -17,7 +17,7 @@ def extract_files(text):
     return groups
 
 
-if __name__ == "__main__":
+if __name__ == "__main__"
     token = input("Give your api token:  ")
     url1 = "https://canvas.ubc.ca/"
     output1 = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     canvas = Canvas(url1, token)
     courses = []
     for x in range(num_of_courses):
-        course = canvas.get_course(input("What is the course number?: "))
+        course = canvas.get_course(int(input("What is the course number?: ")))
         courses.append(course)
         
     for course in courses:
@@ -39,46 +39,47 @@ if __name__ == "__main__":
         for module in modules:
             module: Module = module
             module_items = module.get_module_items()
+            print(course.name)
             for item in module_items:
                 item: ModuleItem = item
 
                 path = f"{output}/" \
-                    f"{sanitize_filename(course.attributes['name'])}/" \
-                    f"{sanitize_filename(module.attributes['name'])}/"
+                    f"{sanitize_filename(course.name)}/" \
+                    f"{sanitize_filename(module.name)}/"
                 if not os.path.exists(path):
                     os.makedirs(path)
 
-                item_type = item.attributes["type"]
-                print(f"{course.attributes['name']} - "
-                      f"{module.attributes['name']} - "
-                      f"{item.attributes['title']} ({item_type})")
+                item_type = item.type
+                print(f"{course.name} - "
+                      f"{module.name} - "
+                      f"{item.title} ({item_type})")
 
                 if item_type == "File":
-                    file = canvas.get_file(item.attributes["content_id"])
-                    files_downloaded.add(item.attributes["content_id"])
-                    file.download(path + sanitize_filename(file.attributes['filename']))
+                    file = canvas.get_file(item.content_id)
+                    files_downloaded.add(item.content_id)
+                    file.download(path + sanitize_filename(file.filename))
                 elif item_type == "Page":
-                    page = course.get_page(item.attributes["page_url"])
-                    with open(path + sanitize_filename(item.attributes['title']) + ".html", "w", encoding="utf-8") as f:
-                        f.write(page.attributes["body"] or "")
-                    files = extract_files(page.attributes["body"] or "")
+                    page = course.get_page(item.page_url)
+                    with open(path + sanitize_filename(item.title) + ".html", "w", encoding="utf-8") as f:
+                        f.write(page.body or "")
+                    files = extract_files(page.body or "")
                     for file_id in files:
                         if file_id in files_downloaded:
                             continue
                         try:
                             file = course.get_file(file_id)
                             files_downloaded.add(file_id)
-                            file.download(path + sanitize_filename(file.attributes['filename']))
+                            file.download(path + sanitize_filename(file.filename))
                         except ResourceDoesNotExist:
                             pass
                 elif item_type == "ExternalUrl":
-                    url = item.attributes["external_url"]
-                    with open(path + sanitize_filename(item.attributes['title']) + ".url", "w") as f:
+                    url = item.external_url
+                    with open(path + sanitize_filename(item.title) + ".url", "w") as f:
                         f.write("[InternetShortcut]\n")
                         f.write("URL=" + url)
                 elif item_type == "Assignment":
-                    assignment = course.get_assignment(item.attributes["content_id"])
-                    with open(path + sanitize_filename(item.attributes['title']) + ".html", "w", encoding="utf-8") as f:
+                    assignment = course.get_assignment(item.content_id)
+                    with open(path + sanitize_filename(item.title) + ".html", "w", encoding="utf-8") as f:
                         f.write(assignment.attributes["description"] or "")
                     files = extract_files(assignment.attributes["description"] or "")
                     for file_id in files:
@@ -87,7 +88,7 @@ if __name__ == "__main__":
                         try:
                             file = course.get_file(file_id)
                             files_downloaded.add(file_id)
-                            file.download(path + sanitize_filename(file.attributes['filename']))
+                            file.download(path + sanitize_filename(file.filename))
                         except ResourceDoesNotExist:
                             pass
 
@@ -96,9 +97,9 @@ if __name__ == "__main__":
             for file in files:
                 file: File = file
                 if not file.attributes["id"] in files_downloaded:
-                    print(f"{course.attributes['name']} - {file.attributes['filename']}")
-                    path = f"{output}/{sanitize_filename(course.attributes['name'])}/" \
-                        f"{sanitize_filename(file.attributes['filename'])}"
+                    print(f"{course.name} - {file.filename}")
+                    path = f"{output}/{sanitize_filename(course.name)}/" \
+                        f"{sanitize_filename(file.filename)}"
                     file.download(path)
         except Unauthorized:
             pass
